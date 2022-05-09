@@ -20,6 +20,10 @@ inputs:
   password:
     description: 'Password for kiuwan platform'
     required: true
+  sourcepath:
+    description: 'Path of the source code to analyze'
+    required: false
+    default: ${{ github.workspace }}
   databasetype:
     description: 'Database type files in the project, if any. Can be one or more of [none, transacsql, plsql, informix]'
     required: false

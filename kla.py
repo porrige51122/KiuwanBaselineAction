@@ -11,9 +11,9 @@ import stat
 from pathlib import Path
 
 # print environment, the results should be there
-# print("--------------------- ENVIRONMENT ------------------------")
-# print (os.environ)
-# print("--------------------- ENVIRONMENT ------------------------")
+print("--------------------- ENVIRONMENT ------------------------")
+print (os.environ)
+print("--------------------- ENVIRONMENT ------------------------")
 
 # Params used in the call to the baseline analysis.
 # All the parameters set in the action are stored as environment variables with INPUT_ prefix
@@ -22,10 +22,9 @@ PARAM_KLA_APPNAME = os.environ["INPUT_PROJECT"]
 PARAM_KLA_LABEL = os.environ["INPUT_LABEL"]
 PARAM_KLA_USERNAME = os.environ["INPUT_USERID"]
 PARAM_KLA_PASSWORD = os.environ["INPUT_PASSWORD"]
+PARAM_KLA_SOURCEDIR = os.environ["INPUT_SOURCEPATH"]
 PARAM_KLA_DATABASETYPE = os.environ["INPUT_DATABASETYPE"]
 PARAM_KLA_ADVANCEDPARAMS = os.environ["INPUT_ADVANCEDPARAMS"]
-
-PARAM_KLA_SOURCEDIR = os.environ["GITHUB_WORKSPACE"]
 
 KLA_URL = PARAM_KLA_BASEURL + "/pub/analyzer/KiuwanLocalAnalyzer.zip"
 TMP_EXTRACTION_DIR = os.environ["WORKSPACE"] + "/kla"
@@ -92,11 +91,7 @@ def getBLAnalysisResultsURL(
     print("Calling REST API [", apicall, "] ...")
 
     kla_password = kla_password.replace("\\", "")
-    authString = (
-        base64.encodebytes(("%s:%s" % (kla_user, kla_password)).encode())
-        .decode()
-        .strip()
-    )
+    authString = base64.encodebytes(('%s:%s' % (kla_user,kla_password)).encode()).decode().strip()
 
     if "domain-id" in advanced:
         posDomain = advanced.find("domain-id")
