@@ -22,14 +22,14 @@ PARAM_KLA_SOURCEDIR = os.environ["INPUT_SOURCEPATH"]
 PARAM_KLA_DATABASETYPE = os.environ["INPUT_DATABASETYPE"]
 PARAM_KLA_ADVANCEDPARAMS = os.environ["INPUT_ADVANCEDPARAMS"]
 
-KLA_URL = PARAM_KLA_BASEURL + "/pub/analyzer/KiuwanLocalAnalyzer.zip"
+KLA_URL = f"{PARAM_KLA_BASEURL}/pub/analyzer/KiuwanLocalAnalyzer.zip"
 TMP_EXTRACTION_DIR = os.environ["WORKSPACE"] + "/kla"
-KLA_EXE_DIR = TMP_EXTRACTION_DIR + "/KiuwanLocalAnalyzer/bin"
+KLA_EXE_DIR = f"{TMP_EXTRACTION_DIR}/KiuwanLocalAnalyzer/bin"
 
 # Function to create the Kiuwan KLA line command.
 # It is created with the minimum amount of parameters. Then the advanced parameters are passed in, the User is responsible for a good format
 # Note the memory parameter has been already created properly
-def getKLACmd(
+def get_kla_cmd(
     tmp_dir=TMP_EXTRACTION_DIR,
     appname=PARAM_KLA_APPNAME,
     label=PARAM_KLA_LABEL,
@@ -39,18 +39,16 @@ def getKLACmd(
     dbtype=PARAM_KLA_DATABASETYPE,
     advanced=PARAM_KLA_ADVANCEDPARAMS,
 ):
-    prefix = tmp_dir + "/KiuwanLocalAnalyzer/bin/"
-    agent = prefix + "agent.sh"
+    prefix = f"{tmp_dir}/KiuwanLocalAnalyzer/bin/"
+    agent = f"{prefix}agent.sh"
     os.chmod(agent, stat.S_IRWXU)
 
-    klablcmd = "{} -c -n {} -l {} -s {} --user {} --pass {} transactsql.parser.valid.list={} {}".format(
-        agent, appname, label, sourcedir, user, password, dbtype, advanced
-    )
-    return klablcmd
+    kla_cmd = "{agent} -c -n {appname} -l {label} -s {sourcedir} --user {user} --pass {password} transactsql.parser.valid.list={dbtype} {advanced}".format()
+    return kla_cmd
 
 
 # Function to download and extract the Kiuwan Local Analyzer from kiuwan server
-def downloadAndExtractKLA(tmp_dir=TMP_EXTRACTION_DIR, kla_url=KLA_URL):
+def download_and_extract_kla(tmp_dir=TMP_EXTRACTION_DIR, kla_url=KLA_URL):
     print("Downloading KLA zip from ", kla_url, " to [", tmp_dir, "]")
     resp = urllib.request.urlopen(kla_url)
     zipf = zipfile.ZipFile(io.BytesIO(resp.read()))
@@ -59,7 +57,7 @@ def downloadAndExtractKLA(tmp_dir=TMP_EXTRACTION_DIR, kla_url=KLA_URL):
 
 
 # Parse the output of the analysis resutl to get the analysis code
-def getBLAnalysisCodeFromKLAOutput(output_to_parse):
+def get_analysis_output_code(output_to_parse):
     return output_to_parse.split("Analysis created in Kiuwan with code:", 1)[1].split()[
         0
     ]
@@ -97,16 +95,14 @@ def getBLAnalysisResultsURL(
     else:
         my_headers = {"Authorization": f"Basic {authString}"}
     response = requests.get(url=apicall, headers=my_headers)
+    url = json.loads(response.content)["analysisURL"]
 
-    print(response)
-    print("Response Contents:", response.content)
-    jdata = json.loads(response.content)
-    return jdata["analysisURL"]
+    return url
 
 
 # Function to excetute the actual Kiuwan Local Analyzer command line and get the resutls.
-def executeKLA(cmd):
-    print("Executing [", cmd, "] ...")
+def execute_kla(cmd):
+    print(f"Executing [ {cmd} ]")
     pipe = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
     output_text = ""
     try:
@@ -123,17 +119,17 @@ def executeKLA(cmd):
 
 # Actual executing code after defining the functions
 # Extract and download KLA from kiuwan.com (or from on-premise site)
-downloadAndExtractKLA(tmp_dir=TMP_EXTRACTION_DIR)
+download_and_extract_kla(tmp_dir=TMP_EXTRACTION_DIR)
 
 # Build the KLA CLI command
-kla_bl_cmd = getKLACmd(tmp_dir=TMP_EXTRACTION_DIR)
+kla_bl_cmd = get_kla_cmd(tmp_dir=TMP_EXTRACTION_DIR)
 
 # Execute CLA KLI and set results as outputs
-output, rc = executeKLA(kla_bl_cmd)
+output, rc = execute_kla(kla_bl_cmd)
 print(f"::set-output name=result::{rc}")
 print(f"KLA return code: {rc}")
 if rc == 0:
-    analysis_code = getBLAnalysisCodeFromKLAOutput(output)
+    analysis_code = get_analysis_output_code(output)
     print(f"Analysis code [ {analysis_code} ]")
     url_analysis = getBLAnalysisResultsURL(analysis_code)
     print("Analysis URL: ", url_analysis)
