@@ -26,7 +26,7 @@ steps:
       - name: Checkout the repository
         uses: actions/checkout@v1
       - name: Kiuwan Baseline Analysis
-        uses: lsacera/KiuwanBaselineAction@v1.0
+        uses: lsacera/KiuwanBaselineAction@v1.3
         with:
           # Name of Kiuwan project
           project: Personalblog
@@ -44,7 +44,7 @@ Example of basic usage with SSO authentication:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - uses: actions/checkout@v1
     - name: Kiuwan Baseline Analysis
-      uses: lsacera/KiuwanBaselineAction@v1.1
+      uses: lsacera/KiuwanBaselineAction@v1.3
       with:
           # Name of Kiuwan project
           project: Chess
